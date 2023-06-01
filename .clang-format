@@ -1,0 +1,16 @@
+BasedOnStyle: LLVM
+AccessModifierOffset: -3
+ContinuationIndentWidth: 6
+IndentWidth: 3
+AlignAfterOpenBracket: AlwaysBreak
+AlignOperands: DontAlign
+AlignEscapedNewlines: DontAlign
+AllowShortFunctionsOnASingleLine: Empty
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeTernaryOperators: false
+ColumnLimit: 100
+KeepEmptyLinesAtTheStartOfBlocks: false
+IndentPPDirectives: BeforeHash
+PenaltyReturnTypeOnItsOwnLine: 200
+PointerAlignment: Left
