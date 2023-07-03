@@ -11,10 +11,10 @@ template <class ForwardIt, class T, class Compare>
 constexpr ForwardIt sbm_lower_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp) {
    auto length = last - first;
    while (length > 0) {
-      auto rem = length % 2;
-      length /= 2;
+      auto half = length / 2;
       // gcc generates a cmov with a multiply instead of a ternary conditional
-      first += comp(first[length], value) * (length + rem);
+      first += comp(first[half], value) * (length - half);
+      length = half;
    }
    return first;
 }

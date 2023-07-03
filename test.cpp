@@ -4,6 +4,7 @@
 
 #include "asm_lower_bound.h"
 #include "bb_lower_bound.h"
+#include "bit_lower_bound.h"
 #include "branchless_lower_bound.h"
 #include "bstd_lower_bound.h"
 #include "fb_lower_bound.h"

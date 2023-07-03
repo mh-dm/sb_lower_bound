@@ -11,11 +11,12 @@ template <class ForwardIt, class T, class Compare>
 constexpr ForwardIt sb_lower_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp) {
    auto length = last - first;
    while (length > 0) {
-      auto rem = length % 2;
-      length /= 2;
-      if (comp(first[length], value)) {
-         first += length + rem;
+      auto half = length / 2;
+      if (comp(first[half], value)) {
+         // length - half equals half + length % 2
+         first += length - half;
       }
+      length = half;
    }
    return first;
 }
