@@ -16,6 +16,7 @@
 #include "std_lower_bound.h"
 
 #include <chrono>
+#include <climits>
 #include <iostream>
 #include <random>
 
@@ -98,9 +99,8 @@ constexpr auto make_value = make_vt<Type>;
 int main() {
    using std::chrono::high_resolution_clock;
    Func functions[] = {
-         // Ignore results from first run function as it has a measurable disadvantage.
-         std_lower_bound,
          std::lower_bound,
+         // std_lower_bound,
          branchless_lower_bound,
          // asm_lower_bound,
          // bstd_lower_bound,
@@ -113,44 +113,54 @@ int main() {
          bb_lower_bound};
    double times[std::size(functions)] = {};
    std::minstd_rand rand;
-   long stride = 100007;
-   // int stride = 1;
-   int max_calls = 200000;
-   // int limit = 32;
+   int stride = 10007; // Must be prime
+   int calls = INT_MAX / stride;
+   std::cout << "Will make " << calls << " calls for each size" << std::endl;
    int limit = 1024 * 1024 * (std::is_same<Type, std::string>::value ? 1 : 4);
    // std::cout << make_value(limit) << std::endl;
+
+   std::vector<Type> input(limit);
+   for (int i = 0; i < limit; i++) {
+      input[i] = make_value(i);
+   }
+   std::vector<int> shuffled(calls);
+   for (int i = 0; i < calls; i++) {
+      shuffled[i] = stride * i;
+   }
+   rand.seed(1);
+   std::shuffle(shuffled.begin(), shuffled.end(), rand);
+
    int sizes = 0;
-   int last = 0;
-   std::vector<Type> vec;
    for (int size = 0; size <= limit; size = size * 1.1 + 1) {
       sizes++;
-      for (; last < size; last++) {
-         vec.push_back(make_value(last));
-      }
       int checks = size + 1;
-      int calls = checks * (max_calls / checks + 1);
-      std::vector<int> shuffled(calls);
-      for (int i = 0; i < calls; i++) {
-         shuffled[i] = (stride * i) % checks;
+      if (checks % stride == 0) {
+         std::cout << "Error! Non-random sample given stride " << stride;
+         std::cout << " and size " << size << std::endl;
+         return 2;
       }
-      rand.seed(1);
-      std::shuffle(shuffled.begin(), shuffled.end(), rand);
-      calls = max_calls;
 
-      std::cout << "size\t" << vec.size() << "\t";
+      std::cout << "size\t" << size;
       for (unsigned funi = 0; funi < std::size(functions); funi++) {
+         // Copies to ensure same state of caches
+         std::vector<Type> vec(input.begin(), input.begin() + size);
+         std::vector<int> shuff(shuffled);
+         for (int i = 0; i < calls; i++) {
+            shuff[i] %= checks;
+         }
+         std::cout << "\t" << std::flush;
          auto t0 = high_resolution_clock::now();
          for (int i = 0; i < calls; i++) {
-            Type value = make_value(shuffled[i]);
+            Type value = make_value(shuff[i]);
             auto res = functions[funi](vec.begin(), vec.end(), value);
             auto found = res - vec.begin();
-            if (found != shuffled[i]) {
-               std::cout << " Error! " << found << " instead of " << shuffled[i] << std::endl;
+            if (found != shuff[i]) {
+               std::cout << "Error! " << found << " instead of " << shuff[i] << std::endl;
                return 2;
             }
          }
          auto time = high_resolution_clock::now() - t0;
-         std::cout << time.count() / calls << "\t";
+         std::cout << time.count() / calls << std::flush;
          times[funi] += double(time.count()) / calls;
       }
       std::cout << std::endl;
