@@ -12,6 +12,8 @@
 #include "rem_lower_bound.h"
 #include "sb_lower_bound.h"
 #include "sbm_lower_bound.h"
+#include "sbp_lower_bound.h"
+#include "sbpm_lower_bound.h"
 #include "sbu_lower_bound.h"
 #include "std_lower_bound.h"
 
@@ -115,9 +117,10 @@ int main() {
          // fb_lower_bound,
          // pb_lower_bound,
          sb_lower_bound,
-         sbm_lower_bound,
+         sbp_lower_bound,
          // sbu_lower_bound,
-         bb_lower_bound};
+         // bb_lower_bound,
+   };
    double times[std::size(functions)] = {};
    std::minstd_rand rand;
    int stride = 5003; // Must be prime
