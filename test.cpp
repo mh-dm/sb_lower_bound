@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <climits>
+#include <iomanip>
 #include <iostream>
 #include <random>
 
@@ -84,6 +85,12 @@ template <typename T> T make_vt(int value) {
    return T(value);
 }
 
+template <> float make_vt(int value) {
+   value += 1 << 23; // Avoid subnormal floats
+   // Why is the std::bit_cast gone??
+   return *(float*)(&value); // Bit conversion to prevent precision loss
+}
+
 template <> __attribute__((noinline)) std::string make_vt(int value) {
    constexpr int len = 10;
    std::string res(len, 'a');
@@ -113,7 +120,7 @@ int main() {
          bb_lower_bound};
    double times[std::size(functions)] = {};
    std::minstd_rand rand;
-   int stride = 10007; // Must be prime
+   int stride = 5003; // Must be prime
    int calls = INT_MAX / stride;
    std::cout << "Will make " << calls << " calls for each size" << std::endl;
    int limit = 1024 * 1024 * (std::is_same<Type, std::string>::value ? 1 : 4);
@@ -165,6 +172,7 @@ int main() {
       }
       std::cout << std::endl;
    }
+   std::cout << std::fixed << std::setprecision(1);
    for (auto& time : times) {
       std::cout << time / sizes << " ";
    }
